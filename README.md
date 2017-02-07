@@ -37,7 +37,7 @@ public class Main {
         HashMap<Object, Object> m = new HashMap<>();
         m.put("key1", "value");
         m.put("key2", "value");
-        m.put("key3", i);
+        m.put("ids", ids);
 
         // 普通分页参数
         data.put("page", 2);
