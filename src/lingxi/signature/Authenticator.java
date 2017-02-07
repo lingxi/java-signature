@@ -87,7 +87,7 @@ public class Authenticator {
             String key = entry.getKey().toString();
 
             // 过滤一些字段和值为空的数据
-            if (key == "signature" || value == null || value == "") {
+            if (key.equals("signature") || value == null || value.equals("")) {
                 continue;
             }
 
