@@ -29,15 +29,15 @@ public class Main {
 
         // 数组参数使用 ArrayList
         List<Integer> ids = new ArrayList<>();
-        i.add(1);
-        i.add(2);
-        i.add(3);
+        ids.add(1);
+        ids.add(2);
+        ids.add(3);
 
         // HashMap 参数
         HashMap<Object, Object> m = new HashMap<>();
         m.put("key1", "value");
         m.put("key2", "value");
-        m.put("key3", i);
+        m.put("ids", ids);
 
         // 普通分页参数
         data.put("page", 2);
@@ -56,6 +56,8 @@ public class Main {
 ```
 
 ### 签名验证
+
+抛出了两个异常 SignatureTimestampException 时间戳过期，以及 SignatureValueException 签名错误
 
 ```java
 try {
