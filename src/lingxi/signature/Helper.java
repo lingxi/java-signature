@@ -16,6 +16,10 @@ public class Helper {
         return randomString(8);
     }
 
+    public static String time() {
+        return String.valueOf(System.currentTimeMillis()).substring(0, 10);
+    }
+
     public static String randomString(int length) {
         String base = "abcdefghijklmnopqrstuvwxyz0123456789";
         Random random = new Random();

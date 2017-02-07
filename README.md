@@ -10,7 +10,9 @@
 
 [Json-Simple](https://code.google.com/archive/p/json-simple/)
 
-### 用法
+### 基本用法
+
+获取请求的验证数据
 
 ```java
 package lingxi.signature;
@@ -51,4 +53,21 @@ public class Main {
     }
 }
 
+```
+
+### 签名验证
+
+```java
+try {
+    HashMap<Object, Object> data1 = new HashMap<>();
+    data1.put("key", "secret");
+
+    if (auther.attempt(data1)) {
+        // passed, do you want...        
+    }
+} catch (SignatureTimestampException | SignatureValueException e) {
+    System.out.println(e.getMessage());
+} catch (Exception e) {
+    e.printStackTrace();
+}
 ```

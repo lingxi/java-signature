@@ -1,5 +1,7 @@
 package lingxi.signature;
 
+import lingxi.signature.exception.SignatureTimestampException;
+import lingxi.signature.exception.SignatureValueException;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
@@ -16,6 +18,8 @@ public class Authenticator {
 
     private String apiKeyName;
 
+    final private int TIME_EXPIRED = 600;
+
     Authenticator(String apiKey, String apiSecret) {
         this.apiKey = apiKey;
         this.apiSecret = apiSecret;
@@ -28,8 +32,47 @@ public class Authenticator {
         this.apiKeyName = apiKeyName;
     }
 
+    Boolean attempt(HashMap<Object, Object> parameters) throws UnsupportedEncodingException, SignatureValueException, NoSuchAlgorithmException, InvalidKeyException, SignatureTimestampException {
+        return this.verify(parameters);
+    }
+
+    boolean verify(HashMap<Object, Object> parameters) throws SignatureTimestampException, SignatureValueException, UnsupportedEncodingException, InvalidKeyException, NoSuchAlgorithmException {
+        // 检查时间是否过期
+        this.checkTimestampInValid(parameters);
+
+        // 检查签名是否正确
+        this.checkSignatureValue(parameters);
+
+        return true;
+    }
+
+    private void checkSignatureValue(HashMap<Object, Object> parameters) throws SignatureValueException, UnsupportedEncodingException, InvalidKeyException, NoSuchAlgorithmException {
+        if (! parameters.containsKey("signature")) {
+            throw new SignatureValueException("签名错误");
+        }
+
+        String requestSignature = parameters.get("signature").toString();
+
+        if (! requestSignature.equals(this.generateAuthParameters(parameters).get("signature").toString())) {
+            throw new SignatureValueException("签名错误");
+        }
+    }
+
+    private void checkTimestampInValid(HashMap<Object, Object> parameters) throws SignatureTimestampException {
+        if (! parameters.containsKey("stamp")) {
+            throw new SignatureTimestampException("请求时间过期，请重新请求");
+        }
+
+        int requestTime = Integer.valueOf(parameters.get("stamp").toString());
+        int now = Integer.valueOf(Helper.time());
+
+        if (now - requestTime > TIME_EXPIRED) {
+            throw new SignatureTimestampException("请求时间过期，请重新请求");
+        }
+    }
+
     HashMap getAuthParams(HashMap<Object, Object> parameters) throws UnsupportedEncodingException, InvalidKeyException, NoSuchAlgorithmException {
-        parameters.put("stamp", String.valueOf(System.currentTimeMillis()).substring(0, 10));
+        parameters.put("stamp", Helper.time());
         parameters.put("noncestr", Helper.randomString());
         parameters.put(this.getApiKeyName(), this.getApiKey());
 
@@ -43,8 +86,8 @@ public class Authenticator {
             Object value = entry.getValue();
             String key = entry.getKey().toString();
 
-            // 普通数字字符串不为空
-            if (value == null || value == "") {
+            // 过滤一些字段和值为空的数据
+            if (key == "signature" || value == null || value == "") {
                 continue;
             }
 
@@ -68,12 +111,7 @@ public class Authenticator {
             sortedMap.put(key, value.toString());
         }
 
-        String queryLink = "";
-        for (Map.Entry<String, String> entry : sortedMap.entrySet()) {
-            queryLink += entry.getKey() + "=" + entry.getValue() + "&";
-        }
-
-        queryLink = Helper.createQueryLink(sortedMap);
+        String queryLink = Helper.createQueryLink(sortedMap);
 
         parameters.put("signature", Helper.sha256(queryLink, this.getApiSecret()));
 
