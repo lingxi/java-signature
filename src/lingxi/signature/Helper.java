@@ -44,7 +44,7 @@ public class Helper {
     public static String createQueryLink(Map<String, String> parameters) throws UnsupportedEncodingException {
         String queryLink = "";
         for (Map.Entry<String, String> entry : parameters.entrySet()) {
-            queryLink += entry.getKey() + "=" + URLEncoder.encode(String.valueOf(entry.getValue()), "utf-8") + "&";
+            queryLink += entry.getKey() + "=" + entry.getValue()  + "&";
         }
 
         return queryLink.substring(0, queryLink.length() - 1);
